@@ -20,6 +20,20 @@ import { Link } from '@inertiajs/vue3';
                     <span class="menu-title">Roles</span>
                 </Link>
             </li>
+            <li class="nav-item">
+                <!-- Use href instead of :url -->
+                <Link class="nav-link" :href="route('permissions.index')">
+                    <i class="icon-grid menu-icon"></i>
+                    <span class="menu-title">Permissions</span>
+                </Link>
+            </li>
+            <li class="nav-item">
+                <!-- Use href instead of :url -->
+                <Link class="nav-link" :href="route('users.index')">
+                    <i class="icon-grid menu-icon"></i>
+                    <span class="menu-title">Users</span>
+                </Link>
+            </li>
         </ul>
     </nav>
 </template>
