@@ -2,7 +2,7 @@
     <Head title="Permissions" />
     <AuthenticatedLayout>
         <!-- Permission Form -->
-        <div class="card" ref="formContainer">
+        <div v-if="hasPermission('create permission')" class="card" ref="formContainer">
             <div class="card-body">
                 <h4 class="card-title">{{ isEditing ? "Edit Permission" : "Create Permission" }}</h4>
                 <p class="card-description">{{ isEditing ? "Edit the selected permission" : "Create a new permission" }}</p>
@@ -39,18 +39,18 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Actions</th>
+                                <th v-if="hasPermission('update permission') || hasPermission('delete permission')">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="permission in props.permissions" :key="permission.id">
                                 <td>{{ permission.id }}</td>
                                 <td>{{ permission.name }}</td>
-                                <td>
-                                    <button @click="editPermission(permission)" type="button" class="btn btn-inverse-info btn-icon m-1">
+                                <td v-if="hasPermission('update permission') || hasPermission('delete permission')">
+                                    <button v-if="hasPermission('update permission')" @click="editPermission(permission)" type="button" class="btn btn-inverse-info btn-icon m-1">
                                         <i class="ti-pencil"></i>
                                     </button>
-                                    <button @click="deletePermission(permission.id)" type="button" class="btn btn-inverse-danger btn-icon m-1">
+                                    <button v-if="hasPermission('delete permission')" @click="deletePermission(permission.id)" type="button" class="btn btn-inverse-danger btn-icon m-1">
                                         <i class="ti-trash"></i>
                                     </button>
                                 </td>
@@ -74,6 +74,7 @@ const Swal = useSwal();
 
 const props = defineProps({
     permissions: Array,
+    user_permissions: Array,
 });
 
 const toast = useToast();
@@ -152,4 +153,7 @@ const deletePermission = (id) => {
         }
     });
 };
+const hasPermission = (permission) => {
+    return props.user_permissions.includes(permission);
+}
 </script>

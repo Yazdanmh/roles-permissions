@@ -7,8 +7,10 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <p class="card-description">All Users</p>
                     <Link
+                        v-if="hasPermission('create users')"
                         :href="route('users.create')"
-                        class="btn btn-primary btn-icon-text">Create User</Link>
+                        class="btn btn-primary btn-icon-text"
+                    >Create User</Link>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -18,7 +20,9 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Roles</th>
-                                <th>Action</th>
+                                <th v-if="hasPermission('update users') || hasPermission('delete users')">
+                                    Action
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -28,20 +32,24 @@
                                 <td>{{ user.email }}</td>
                                 <td>
                                     <!-- Display Roles as Badges -->
-                                    <span v-for="role in user.roles" :key="role.id" class="badge badge-primary mr-1">
+                                    <span
+                                        v-for="role in user.roles"
+                                        :key="role.id"
+                                        class="badge badge-primary mr-1"
+                                    >
                                         {{ role.name }}
-                                    
                                     </span>
-                                    
                                 </td>
-                                <td class="d-flex align-items-center gap-2">
+                                <td class="d-flex align-items-center gap-2" v-if="hasPermission('update users') || hasPermission('delete users')">
                                     <Link
+                                        v-if="hasPermission('update users')"
                                         :href="route('users.edit', user.id)"
                                         class="btn btn-inverse-info btn-icon d-flex align-items-center justify-content-center m-2"
                                     >
                                         <i class="ti-pencil"></i>
                                     </Link>
                                     <button
+                                        v-if="hasPermission('delete users')"
                                         @click="deleteUser(user.id)"
                                         type="button"
                                         class="btn btn-inverse-danger btn-icon d-flex align-items-center justify-content-center m-2"
@@ -68,7 +76,8 @@ import { useSwal } from "@/swal";
 const Swal = useSwal();
 const form = useForm({});
 const props = defineProps({
-    users: Array, // Users should have a 'roles' relationship
+    users: Array,
+    permissions: Array,
 });
 
 const toast = useToast();
@@ -79,7 +88,7 @@ const deleteUser = (id) => {
         text: "Do you really want to delete this user?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Yes",
+        confirmButtonText: "Yes, Delete",
         cancelButtonText: "No",
         showLoaderOnConfirm: true,
     }).then((result) => {
@@ -94,5 +103,9 @@ const deleteUser = (id) => {
             });
         }
     });
+};
+
+const hasPermission = (permission) => {
+    return props.permissions.includes(permission);
 };
 </script>

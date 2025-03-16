@@ -9,32 +9,22 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\UsersController;
 
-Route::group(['middleware' => ['auth', 'role:Super-Admin|Admin|Staff']], function() {
+Route::group(['middleware' => ['auth', 'isAdmin']], function() {
     
-    // Roles Management (Super-Admin and Admin have these permissions)
     Route::resource('roles', RolesController::class);
 
-
-    // Permission Assignment to Roles (Only for users with 'assign permissions to roles' permission)
     Route::get('give-permission/{id}', [RolesController::class, 'addPermissionToRole'])->name('roles.addPermission');
     Route::put('give-permission/{id}', [RolesController::class, 'storePermissionToRole'])->name('roles.storePermission');
     
-    // Permissions Management (Super-Admin and Admin have these permissions)
-    Route::resource('permissions', PermissionsController::class); // CRUD for permissions
-
-    // Users Management (Super-Admin and Admin have these permissions)
-    Route::resource('users', UsersController::class); // CRUD for users
+    Route::resource('permissions', PermissionsController::class);
+    Route::resource('users', UsersController::class); 
 });
 
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('login');
 });
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

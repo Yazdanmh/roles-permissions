@@ -1,14 +1,10 @@
 <template>
     <Head title="Roles" />
     <AuthenticatedLayout>
-        <div class="card" ref="formContainer">
+        <div v-if="hasPermission('create role')" class="card" ref="formContainer">
             <div class="card-body">
-                <h4 class="card-title">
-                    {{ isEditing ? "Edit Role" : "Create Role" }}
-                </h4>
-                <p class="card-description">
-                    {{ isEditing ? "Edit Role" : "Create Role" }}
-                </p>
+                <h4 class="card-title">{{ isEditing ? "Edit Role" : "Create Role" }}</h4>
+                <p class="card-description">{{ isEditing ? "Edit Role" : "Create Role" }}</p>
                 <form class="forms-sample" @submit.prevent="submit">
                     <div class="form-group">
                         <label for="exampleInputName1">Name</label>
@@ -23,16 +19,13 @@
                     <button type="submit" class="btn btn-primary mr-2">
                         {{ isEditing ? "Update Role" : "Create Role" }}
                     </button>
-                    <button
-                        type="button"
-                        class="btn btn-light"
-                        @click.prevent="resetForm"
-                    >
+                    <button type="button" class="btn btn-light" @click.prevent="resetForm">
                         Cancel
                     </button>
                 </form>
             </div>
         </div>
+
         <div class="card mt-4">
             <div class="card-body">
                 <h4 class="card-title">Roles</h4>
@@ -43,25 +36,24 @@
                             <tr>
                                 <th>Id</th>
                                 <th>Name</th>
-                                <th>Action</th>
+                                <th v-if="hasPermission('update role') || hasPermission('delete role') || hasPermission('assign permissions to roles')">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="role in props.roles" :key="role.id">
                                 <td>{{ role.id }}</td>
                                 <td>{{ role.name }}</td>
-                                <td class="d-flex align-items-center gap-2">
+                                <td class="d-flex align-items-center gap-2" v-if="hasPermission('update role') || hasPermission('delete role') || hasPermission('assign permissions to roles')">
                                     <Link
-                                        :href="
-                                            route('roles.addPermission', role.id)
-
-                                        "
+                                        v-if="hasPermission('assign permissions to roles')"
+                                        :href="route('roles.addPermission', role.id)"
                                         class="btn btn-inverse-info btn-icon d-flex align-items-center justify-content-center m-2"
                                     >
                                         <i class="ti-key"></i>
                                     </Link>
 
                                     <button
+                                        v-if="hasPermission('update role')"
                                         @click="editRole(role)"
                                         type="button"
                                         class="btn btn-inverse-info btn-icon d-flex align-items-center justify-content-center m-2"
@@ -70,6 +62,7 @@
                                     </button>
 
                                     <button
+                                        v-if="hasPermission('delete role')"
                                         @click="deleteRole(role.id)"
                                         type="button"
                                         class="btn btn-inverse-danger btn-icon d-flex align-items-center justify-content-center m-2"
@@ -97,6 +90,7 @@ const Swal = useSwal();
 
 const props = defineProps({
     roles: Array,
+    permissions: Array,
 });
 
 const toast = useToast();
@@ -106,7 +100,7 @@ const formContainer = ref(null); // Reference to the form container
 const form = useForm({
     name: "",
 });
-
+console.log(props.permissions);
 const editRole = (role) => {
     isEditing.value = true;
     selectedRoleId.value = role.id;
@@ -150,13 +144,14 @@ const submit = () => {
         });
     }
 };
+
 const deleteRole = (id) => {
     Swal.fire({
-        title: "danger",
-        text: "Are you to delete this role?",
+        title: "Are you sure?",
+        text: "Do you really want to delete this role?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Yes",
+        confirmButtonText: "Yes, Delete",
         cancelButtonText: "No",
         showLoaderOnConfirm: true,
     }).then((result) => {
@@ -171,5 +166,9 @@ const deleteRole = (id) => {
             });
         }
     });
+};
+
+const hasPermission = (permission) => {
+    return props.permissions.includes(permission);
 };
 </script>
